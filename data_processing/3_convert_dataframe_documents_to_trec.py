@@ -17,7 +17,7 @@ with open('data/collection.trec', 'w', encoding='utf8') as file:
         doc_element.appendChild(doc_no_element)
 
         doc_text_element = root.createElement('TEXT')
-        doc_text_element.appendChild(root.createTextNode(doc_df['text']))
+        doc_text_element.appendChild(root.createTextNode(f"\n{doc_df['text']}\n"))
         doc_element.appendChild(doc_text_element)
 
         doc_title_element = root.createElement('TITLE')
@@ -28,4 +28,4 @@ with open('data/collection.trec', 'w', encoding='utf8') as file:
         doc_truth_element.appendChild(root.createTextNode(str(doc_df['truth'])))
         doc_element.appendChild(doc_truth_element)
 
-        file.write(doc_element.toprettyxml())
+        file.write(doc_element.toprettyxml(indent=""))

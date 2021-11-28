@@ -10,4 +10,4 @@ unique_queries = df['query'].unique()
 
 # %% Write to file
 
-pd.DataFrame(unique_queries).to_csv('data/queries_raw.txt', header=False, sep='\t')
+pd.DataFrame(unique_queries).to_csv('data/queries.txt', header=False, sep='\t')
