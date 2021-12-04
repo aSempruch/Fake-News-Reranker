@@ -1,6 +1,8 @@
 # Datasets
 datasets/*
 !datasets/info.md
+ranklib/*
+!ranklib/info.md
 
 data/*
 !data/info.md

@@ -1,4 +1,5 @@
 import pandas as pd
+import re
 from util.Galago import Galago
 
 
@@ -13,13 +14,13 @@ class Features:
 
     @staticmethod
     def sum_of_term_frequency(query: str, document: str):
-        sum = 0
+        term_frequency = 0
         for query_term in query.split(' '):
-            sum += document.count(query_term)
+            term_frequency += sum(1 for _ in re.finditer(r'\b%s\b' % re.escape(query_term.lower()), document.lower()))
             # TODO: get term frequency from galago?
             # term_frequency = self.galago.exec_str('some command')
 
-        return sum
+        return term_frequency
 
 
 class GET:

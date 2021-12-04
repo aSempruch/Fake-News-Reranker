@@ -1,7 +1,8 @@
 from util.FeatureExtraction import Features, GET
+import math
 
-# Set to None to disable debug mode
-DEBUG_MODE = 30
+# Number of lines to parse. Set to None to disable debug mode
+DEBUG_MODE = 5000
 """
 FEATURES
     - stream length - t
@@ -36,33 +37,64 @@ general_features = [Features.stream_length]
 """ Query/Document input features """
 query_document_features = [Features.sum_of_term_frequency]
 
+feature_info = []
+feature_info_created = False
+
+
+def process_batch(lines: list):
+    """
+    Processes batch of galago outputs. query_id should be the same for all lines!
+    :param lines: list of (query_id, doc_id, rank, score) tuples
+    """
+    global feature_info_created
+
+    for line in lines:
+        query_id, doc_id, rank, score = line
+
+        rel = math.ceil((len(lines)-int(rank)+1) / (len(lines)/4))-1
+
+        feature_values = []
+
+        for general_feature in general_features:
+            for getter in [get.title, get.text, get.combined]:
+                feature_values.append(general_feature(getter(doc_id)))
+
+                if not feature_info_created:
+                    feature_info.append([general_feature.__name__, getter.__name__])
+
+        for query_document_feature in query_document_features:
+            for getter in [get.title, get.text, get.combined]:
+                feature_values.append(query_document_feature(get.query(query_id), getter(doc_id)))
+                if not feature_info_created:
+                    feature_info.append([query_document_feature.__name__, getter.__name__])
+
+        output_line = [rel, f'qid:{query_id}', *[f'{idx}:{feature_value}' for (idx, feature_value) in enumerate(feature_values)]]
+        output_file.write(' '.join(map(str, output_line)) + '\n')
+
+        feature_info_created = True
+
+
+batch_lines = []
 
 for galago_output_line in galago_output_file:
     query_id, _, doc_id, rank, score, _ = galago_output_line.split(' ')
     # Remove BOM encoding added to start of file by powershell
     query_id = query_id.replace('\ufeff', '')
 
-    # TODO: relevancy
-    rel = 0
-
-    # output_line = [rel, f'qid:{qid}']
-    feature_values = []
-
-    for general_feature in general_features:
-        for getter in [get.title, get.text, get.combined]:
-            feature_values.append(general_feature(getter(doc_id)))
-
-    for query_document_feature in query_document_features:
-        feature_values.append(query_document_feature(get.query(query_id), get.text(doc_id)))
-
-    output_line = [rel, f'qid:{query_id}', *[f'{idx}:{feature_value}' for (idx, feature_value) in enumerate(feature_values)], '\n']
-    output_file.write(' '.join(map(str, output_line)))
+    if len(batch_lines) == 0 or batch_lines[0][0] == query_id:
+        batch_lines.append((query_id, doc_id, rank, score))
+    else:
+        process_batch(batch_lines)
+        batch_lines.clear()
+        batch_lines.append((query_id, doc_id, rank, score))
 
     if DEBUG_MODE is not None:
         DEBUG_MODE -= 1
         if DEBUG_MODE == 0:
             break
 
+
+print(*[f'{idx}:{val[0]}, {val[1]}\n' for idx, val in enumerate(feature_info)])
 
 galago_output_file.close()
 output_file.close()
