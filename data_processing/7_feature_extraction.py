@@ -1,5 +1,7 @@
-import pandas as pd
+from util.FeatureExtraction import Features, GET
 
+# Set to None to disable debug mode
+DEBUG_MODE = 30
 """
 FEATURES
     - stream length - t
@@ -21,38 +23,8 @@ FEATURES
     - variance of tf*idf
 """
 
-
-class Features:
-
-    def __init__(self, galago_index_path):
-        pass
-
-    @staticmethod
-    def stream_length(text: str) -> int:
-        return len(text)
-
-
-class GET:
-
-    @staticmethod
-    def title(doc_id):
-        return NEWS_DF.loc[int(doc_id)]['title']
-
-    @staticmethod
-    def text(doc_id):
-        return NEWS_DF.loc[int(doc_id)]['text']
-
-    @staticmethod
-    def combined(doc_id):
-        return GET.title(doc_id) + ' ' + GET.text(doc_id)
-
-    @staticmethod
-    def subject(doc_id):
-        return NEWS_DF.loc[int(doc_id)]['subject']
-
-
-NEWS_DF = pd.read_csv('data/news_dataframe.csv', index_col=0)
-features = Features('data/index')
+get = GET('data/news_dataframe.csv')
+features = Features()
 
 galago_output_file = open('data/galago_output.txt', mode='r', encoding='utf-16-le')
 output_file = open('data/ranklib_data.txt', mode='w', encoding='utf-8')
@@ -61,8 +33,14 @@ output_file = open('data/ranklib_data.txt', mode='w', encoding='utf-8')
 """ Single input features """
 general_features = [Features.stream_length]
 
+""" Query/Document input features """
+query_document_features = [Features.sum_of_term_frequency]
+
+
 for galago_output_line in galago_output_file:
-    qid, _, doc_id, rank, score, _ = galago_output_line.split(' ')
+    query_id, _, doc_id, rank, score, _ = galago_output_line.split(' ')
+    # Remove BOM encoding added to start of file by powershell
+    query_id = query_id.replace('\ufeff', '')
 
     # TODO: relevancy
     rel = 0
@@ -71,11 +49,19 @@ for galago_output_line in galago_output_file:
     feature_values = []
 
     for general_feature in general_features:
-        for getter in [GET.title, GET.text, GET.combined]:
+        for getter in [get.title, get.text, get.combined]:
             feature_values.append(general_feature(getter(doc_id)))
 
-    output_line = [rel, f'qid:{qid}', *[f'{idx}:{feature_value}' for (idx, feature_value) in enumerate(feature_values)], '\n']
+    for query_document_feature in query_document_features:
+        feature_values.append(query_document_feature(get.query(query_id), get.text(doc_id)))
+
+    output_line = [rel, f'qid:{query_id}', *[f'{idx}:{feature_value}' for (idx, feature_value) in enumerate(feature_values)], '\n']
     output_file.write(' '.join(map(str, output_line)))
+
+    if DEBUG_MODE is not None:
+        DEBUG_MODE -= 1
+        if DEBUG_MODE == 0:
+            break
 
 
 galago_output_file.close()
