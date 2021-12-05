@@ -2,7 +2,7 @@ from util.FeatureExtraction import Features, GET
 import math
 
 # Number of lines to parse. Set to None to disable debug mode
-DEBUG_MODE = 5000
+DEBUG_MODE = 1000
 """
 FEATURES
     - stream length - t
@@ -25,17 +25,20 @@ FEATURES
 """
 
 get = GET()
-features = Features()
+features = Features(get=get)
 
 galago_output_file = open('data/galago_output.txt', mode='r', encoding='utf-16-le')
 output_file = open('data/ranklib_data.txt', mode='w', encoding='utf-8')
 
 
 """ Single input features """
-general_features = [Features.stream_length]
+general_features = [features.stream_length]
+
+""" Query input features """
+query_features = [features.idf]
 
 """ Query/Document input features """
-query_document_features = [Features.sum_of_term_frequency]
+query_document_features = [features.sum_of_term_frequency]
 
 feature_info = []
 feature_info_created = False
@@ -62,9 +65,16 @@ def process_batch(lines: list):
                 if not feature_info_created:
                     feature_info.append([general_feature.__name__, getter.__name__])
 
+        for query_feature in query_features:
+            for getter in [get.title, get.text, get.combined]:
+                feature_values.append(query_feature(query_id))
+
+                if not feature_info_created:
+                    feature_info.append([query_feature.__name__, getter.__name__])
+
         for query_document_feature in query_document_features:
             for getter in [get.title, get.text, get.combined]:
-                feature_values.append(query_document_feature(get.query(query_id), getter(doc_id)))
+                feature_values.append(query_document_feature(query_id, getter(doc_id)))
                 if not feature_info_created:
                     feature_info.append([query_document_feature.__name__, getter.__name__])
 
