@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import re
 from util.Galago import Galago
 import math
@@ -59,3 +60,34 @@ class Features:
             # term_frequency = self.galago.exec_str('some command')
 
         return term_frequency
+
+
+    # This is for features 9-12 -- term frequency normalized by stream length, or divided by stream length, and then obtaining the
+    # max, min, mean, and variance of those terms.
+    def stream_length_normalized(self, query_id: str, document: str) -> float:
+        query = self.get.query(query_id)
+        
+        # Here, I obtain the normalized tf_vals.
+        # I get the doc length, and then for every query term, I add that divided by the stream length
+        # to an array.
+        doc_len = self.stream_length(document)
+        norm_tf_vals = []
+        for query_term in query.split(' '):
+            norm_tf_vals.append( self.get.term_frequency(query_term) / doc_len )
+
+        # Now that I have the normalized term frequency, it is time to get the values for it.
+        norm_tf_sum = sum(norm_tf_vals)
+        norm_tf_min = min(norm_tf_vals)
+        norm_tf_max = max(norm_tf_vals)
+        norm_tf_mean = norm_tf_sum/len(norm_tf_vals)
+        norm_tf_var = np.var(norm_tf_vals)
+
+        norm_tf_set ={
+            "sum":  norm_tf_sum,
+            "min":  norm_tf_min,
+            "max":  norm_tf_max,
+            "mean": norm_tf_mean,
+            "var":  norm_tf_var
+        }
+
+        return norm_tf_set
