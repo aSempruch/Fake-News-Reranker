@@ -83,7 +83,8 @@ class Features:
         doc_len = self.stream_length(document)
         norm_tf_vals = []
         for query_term in query.split(' '):
-            norm_tf_vals.append( self.get.term_frequency(query_term) / doc_len )
+            temp = sum(1 for _ in re.finditer(r'\b%s\b' % re.escape(query_term.lower()), document.lower())) / len(document.split(' '))
+            norm_tf_vals.append( temp / doc_len )
 
         # Now that I have the normalized term frequency, it is time to get the values for it.
         norm_tf_sum = sum(norm_tf_vals)
