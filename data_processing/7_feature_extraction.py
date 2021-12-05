@@ -24,7 +24,7 @@ FEATURES
     - variance of tf*idf
 """
 
-get = GET('data/news_dataframe.csv')
+get = GET()
 features = Features()
 
 galago_output_file = open('data/galago_output.txt', mode='r', encoding='utf-16-le')
@@ -68,7 +68,7 @@ def process_batch(lines: list):
                 if not feature_info_created:
                     feature_info.append([query_document_feature.__name__, getter.__name__])
 
-        output_line = [rel, f'qid:{query_id}', *[f'{idx}:{feature_value}' for (idx, feature_value) in enumerate(feature_values)]]
+        output_line = [rel, f'qid:{query_id}', *[f'{idx+1}:{feature_value}' for (idx, feature_value) in enumerate(feature_values)]]
         output_file.write(' '.join(map(str, output_line)) + '\n')
 
         feature_info_created = True
@@ -94,7 +94,7 @@ for galago_output_line in galago_output_file:
             break
 
 
-print(*[f'{idx}:{val[0]}, {val[1]}\n' for idx, val in enumerate(feature_info)])
+print(*[f'{idx+1}:{val[0]}, {val[1]}\n' for idx, val in enumerate(feature_info)])
 
 galago_output_file.close()
 output_file.close()

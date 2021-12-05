@@ -20,4 +20,4 @@ class Galago:
         Runs galago command
         :return: command output as string
         """
-        return os.popen(f'{self.galago_cmd} {cmd}').read()
+        return os.popen(f'{self.galago_cmd} {cmd}').read().strip()
