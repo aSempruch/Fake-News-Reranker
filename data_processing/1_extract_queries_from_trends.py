@@ -11,6 +11,7 @@ unique_queries.replace(r'[^a-zA-Z\s:]', '', regex=True, inplace=True)
 unique_queries.replace(r'^$', float('NaN'), regex=True, inplace=True)
 unique_queries.replace(' ', float('NaN'), regex=False, inplace=True)
 unique_queries.dropna(inplace=True)
+unique_queries = unique_queries.applymap(str.strip)
 
 # %% Write to file
 

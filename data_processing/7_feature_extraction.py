@@ -27,7 +27,7 @@ FEATURES
 get = GET()
 features = Features(get=get)
 
-galago_output_file = open('data/galago_output.txt', mode='r', encoding='utf-16-le')
+galago_output_file = open('data/galago_output.txt', mode='r', encoding='utf-8')
 output_file = open('data/ranklib_data.txt', mode='w', encoding='utf-8')
 
 
@@ -88,8 +88,6 @@ batch_lines = []
 
 for galago_output_line in galago_output_file:
     query_id, _, doc_id, rank, score, _ = galago_output_line.split(' ')
-    # Remove BOM encoding added to start of file by powershell
-    query_id = query_id.replace('\ufeff', '')
 
     if len(batch_lines) == 0 or batch_lines[0][0] == query_id:
         batch_lines.append((query_id, doc_id, rank, score))

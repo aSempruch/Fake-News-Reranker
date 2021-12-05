@@ -10,7 +10,7 @@ class GET:
     def __init__(self, news_df_path='data/news_dataframe.csv', queries_path='data/queries.txt', term_stats_path='data/galago_term_stats.txt'):
         self.NEWS_DF = pd.read_csv(news_df_path, index_col=0)
         self.QUERIES_DF = pd.read_csv(queries_path, index_col=0, sep="\t", header=None)
-        self.TERM_STATS_DF = pd.read_csv(term_stats_path, index_col=0, sep="\t", header=None, encoding='utf-16-le')
+        self.TERM_STATS_DF = pd.read_csv(term_stats_path, index_col=0, sep="\t", header=None)
 
     def title(self, doc_id):
         return self.NEWS_DF.loc[int(doc_id)]['title']
@@ -28,7 +28,7 @@ class GET:
         return self.QUERIES_DF.loc[int(query_id)].values[0]
 
     def term_frequency(self, term: str) -> int:
-        return self.TERM_STATS_DF.loc[term.lower()][2]
+        return self.TERM_STATS_DF.loc[term.lower()][2] if term in self.TERM_STATS_DF.index else 0
 
 
 class Features:
@@ -47,7 +47,7 @@ class Features:
         number_of_docs = len(self.get.NEWS_DF)
         for query_term in query.split(' '):
             # num_docs_containing_term = int(self.galago.exec_str(f'doccount --index=data/index --x+{query_term}').split('\t')[0])
-            idf_sum += math.log2(number_of_docs / self.get.term_frequency(query_term))
+            idf_sum += math.log2((number_of_docs+1) / (self.get.term_frequency(query_term)+1))
         return idf_sum / len(query.split(' '))
 
     def sum_of_term_frequency(self, query_id: str, document: str) -> float:
