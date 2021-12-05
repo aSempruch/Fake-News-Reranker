@@ -64,7 +64,7 @@ class Features:
 
     # This is for features 9-12 -- term frequency normalized by stream length, or divided by stream length, and then obtaining the
     # max, min, mean, and variance of those terms.
-    def stream_length_normalized(self, query_id: str, document: str) -> float:
+    def stream_length_normalized_tf(self, query_id: str, document: str) -> float:
         query = self.get.query(query_id)
         
         # Here, I obtain the normalized tf_vals.

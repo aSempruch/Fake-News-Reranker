@@ -1,5 +1,3 @@
-import sys
-sys.path.insert(1, r"C:\Users\David's PC\Desktop\646_FINAL PROJECT\folder")
 from util.FeatureExtraction import Features, GET
 import math
 
