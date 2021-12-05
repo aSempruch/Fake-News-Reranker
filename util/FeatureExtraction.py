@@ -3,7 +3,7 @@ import numpy as np
 import re
 from util.Galago import Galago
 import math
-from sklearn.feature_extraction.text import TfidfVectorizer
+import statistics
 
 
 class GET:
@@ -12,6 +12,7 @@ class GET:
         self.NEWS_DF = pd.read_csv(news_df_path, index_col=0)
         self.QUERIES_DF = pd.read_csv(queries_path, index_col=0, sep="\t", header=None)
         self.TERM_STATS_DF = pd.read_csv(term_stats_path, index_col=0, sep="\t", header=None)
+        # self.TFIDF_MODEL = TfidfVectorizer().fit(self.NEWS_DF[['text', 'title']])
 
     def title(self, doc_id):
         return self.NEWS_DF.loc[int(doc_id)]['title']
@@ -51,15 +52,24 @@ class Features:
             idf_sum += math.log2((number_of_docs+1) / (self.get.term_frequency(query_term)+1))
         return idf_sum / len(query.split(' '))
 
-    def sum_of_term_frequency(self, query_id: str, document: str) -> float:
+    def term_frequency(self, query_id: str, document: str) -> dict:
         query = self.get.query(query_id)
-        term_frequency = 0
+        term_frequency = []
         for query_term in query.split(' '):
-            term_frequency += sum(1 for _ in re.finditer(r'\b%s\b' % re.escape(query_term.lower()), document.lower())) / len(document.split(' '))
-            # TODO: get term frequency from galago?
-            # term_frequency = self.galago.exec_str('some command')
+            term_frequency.append(sum(1 for _ in re.finditer(r'\b%s\b' % re.escape(query_term.lower()), document.lower())) / len(document.split(' ')))
 
-        return term_frequency
+        return {
+            'sum': sum(term_frequency),
+            'min': min(term_frequency),
+            'max': max(term_frequency),
+            'mean': statistics.mean(term_frequency),
+            'variance': statistics.variance(term_frequency) if len(term_frequency) > 2 else 0
+        }
+
+    def tfidf(self, query_id: str, document: str) -> dict:
+        tf = self.term_frequency(query_id, document)
+        idf = self.idf(query_id)
+        return {k: v*idf for k, v in tf.items()}
 
 
     # This is for features 9-12 -- term frequency normalized by stream length, or divided by stream length, and then obtaining the

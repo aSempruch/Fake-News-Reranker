@@ -5,23 +5,23 @@ import math
 DEBUG_MODE = 1000
 """
 FEATURES
-    - stream length - t
-    - IDF - q,d
-    - sum of term frequency
-    - min of term frequency
-    - max of term frequency
-    - mean of term frequency
-    - variance of term frequency
-    - sum of stream length normalized term frequency
-    - min of stream length normalized term frequency
-    - max of stream length normalized term frequency
-    - mean of stream length normalized term frequency
-    - variance of stream length normalized term frequency
-    - sum of tf*idf
-    - min of tf*idf
-    - max of tf*idf
-    - mean of tf*idf
-    - variance of tf*idf
+    [X] stream length - t
+    [X] IDF - q,d
+    [X] sum of term frequency
+    [X] min of term frequency
+    [X] max of term frequency
+    [X] mean of term frequency
+    [X] variance of term frequency
+    [ ] sum of stream length normalized term frequency
+    [ ] min of stream length normalized term frequency
+    [ ] max of stream length normalized term frequency
+    [ ] mean of stream length normalized term frequency
+    [ ] variance of stream length normalized term frequency
+    [X] sum of tf*idf
+    [X] min of tf*idf
+    [X] max of tf*idf
+    [X] mean of tf*idf
+    [X] variance of tf*idf
 """
 
 get = GET()
@@ -38,7 +38,7 @@ general_features = [features.stream_length]
 query_features = [features.idf]
 
 """ Query/Document input features """
-query_document_features = [features.sum_of_term_frequency]
+query_document_features = [features.term_frequency, features.tfidf, features.stream_length_normalized_tf]
 
 feature_info = []
 feature_info_created = False
@@ -49,7 +49,7 @@ def process_batch(lines: list):
     Processes batch of galago outputs. query_id should be the same for all lines!
     :param lines: list of (query_id, doc_id, rank, score) tuples
     """
-    global feature_info_created
+    global feature_info, feature_info_created
 
     for line in lines:
         query_id, doc_id, rank, score = line
@@ -74,9 +74,10 @@ def process_batch(lines: list):
 
         for query_document_feature in query_document_features:
             for getter in [get.title, get.text, get.combined]:
-                feature_values.append(query_document_feature(query_id, getter(doc_id)))
+                ret = query_document_feature(query_id, getter(doc_id))
+                feature_values += ret.values()
                 if not feature_info_created:
-                    feature_info.append([query_document_feature.__name__, getter.__name__])
+                    feature_info += [[query_document_feature.__name__, feature_name,  getter.__name__] for feature_name in ret.keys()]
 
         output_line = [rel, f'qid:{query_id}', *[f'{idx+1}:{feature_value}' for (idx, feature_value) in enumerate(feature_values)]]
         output_file.write(' '.join(map(str, output_line)) + '\n')
@@ -102,7 +103,7 @@ for galago_output_line in galago_output_file:
             break
 
 
-print(*[f'{idx+1}:{val[0]}, {val[1]}\n' for idx, val in enumerate(feature_info)])
+print(*[f'{idx+1}:{", ".join(values)}\n' for idx, values in enumerate(feature_info)])
 
 galago_output_file.close()
 output_file.close()
