@@ -14,6 +14,13 @@ class GET:
         self.TERM_STATS_DF = pd.read_csv(term_stats_path, index_col=0, sep="\t", header=None)
         # self.TFIDF_MODEL = TfidfVectorizer().fit(self.NEWS_DF[['text', 'title']])
 
+    def truth(self, doc_id) -> int:
+        """
+        :param doc_id: document id
+        :return: truth label as 0 or 1
+        """
+        return self.NEWS_DF.loc[int(doc_id)]['truth']
+
     def title(self, doc_id):
         return self.NEWS_DF.loc[int(doc_id)]['title']
 
@@ -37,7 +44,7 @@ class Features:
 
     def __init__(self, galago: Galago = None, get: GET = None):
         self.galago = Galago() if galago is None else galago
-        self.get = GET()
+        self.get = GET() if get is None else get
 
     @staticmethod
     def stream_length(text: str) -> int:
@@ -71,10 +78,9 @@ class Features:
         idf = self.idf(query_id)
         return {k: v*idf for k, v in tf.items()}
 
-
     # This is for features 9-12 -- term frequency normalized by stream length, or divided by stream length, and then obtaining the
     # max, min, mean, and variance of those terms.
-    def stream_length_normalized_tf(self, query_id: str, document: str) -> float:
+    def stream_length_normalized_tf(self, query_id: str, document: str) -> dict:
         query = self.get.query(query_id)
         
         # Here, I obtain the normalized tf_vals.
