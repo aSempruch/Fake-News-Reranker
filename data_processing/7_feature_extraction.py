@@ -85,7 +85,7 @@ def process_batch(lines: list):
                 if not feature_info_created:
                     feature_info += [[query_document_feature.__name__, feature_name,  getter.__name__] for feature_name in ret.keys()]
 
-        output_line = [f'qid:{query_id}', *[f'{idx+1}:{feature_value}' for (idx, feature_value) in enumerate(feature_values)]]
+        output_line = [f'qid:{query_id}', *[f'{idx+1}:{feature_value}' for (idx, feature_value) in enumerate(feature_values)], '#', get.truth(doc_id), doc_id]
         output_file_baseline.write(' '.join(map(str, [rel_baseline, *output_line])) + '\n')
         output_file_adjusted.write(' '.join(map(str, [rel_adjusted, *output_line])) + '\n')
 
