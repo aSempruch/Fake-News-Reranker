@@ -10,7 +10,6 @@ files = ['adjusted', 'baseline']
 dfs = [pd.read_csv(f'ranklib/{file}.txt', header=None, sep=" ", index_col=False) for file in files]
 
 # %% Read data
-# TODO: probably want to take arguments to handle multiple file names
 
 ranklib_data = dfs[0]
 ranklib_data['qid'] = ranklib_data[1].str.replace('qid:', '')

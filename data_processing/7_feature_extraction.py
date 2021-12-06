@@ -120,3 +120,10 @@ print(*[f'{idx+1}:{", ".join(values)}\n' for idx, values in enumerate(feature_in
 galago_output_file.close()
 output_file_baseline.close()
 output_file_adjusted.close()
+
+"""
+Focus on identifying important features
+
+Model trained on veracity - evaluate on relevancy and veracity data
+Train model on weak labels and do the same
+"""
