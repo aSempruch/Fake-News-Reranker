@@ -6,6 +6,7 @@ ranklib/*
 
 data/*
 !data/info.md
+models/*
 
 # IntelliJ configuration
 .idea/*
