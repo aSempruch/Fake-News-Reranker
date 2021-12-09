@@ -21,7 +21,7 @@ DEFAULT_PARAMS = {
 
 def ranklib_featureEval(modelFile: str):
     modelLoc = 'models/' + modelFile + '.txt'
-    # NOTE -- the ';' in between MATH3_JAR and 'RANKLIB_JAR' is for windows systems only.
+    # NOTE -- the ';' in between MATH3_JAR and 'RANKLIB_JAR' is for windows systems only.  Try using ':' instead of it doesn't work.
     cmd = f'"{JAVA_HOME}/bin/java.exe"   -cp \"{MATH3_JAR}\";\"{RANKLIB_JAR}\" \"ciir.umass.edu.features.FeatureManager\" -feature_stats {modelLoc}'
     output = os.popen(cmd).read()
 
