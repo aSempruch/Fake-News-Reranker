@@ -3,6 +3,7 @@ sys.path.insert(1, r"C:\Users\David's PC\Desktop\646_FINAL PROJECT\folder")
 from util.FeatureExtraction import Features, GET
 from tqdm import tqdm
 import numpy as np
+import pandas as pd
 import math
 
 # Number of lines to parse. Set to None to disable debug mode
@@ -39,7 +40,7 @@ galago_output_line_count = sum(1 for _ in galago_output_file)
 galago_output_file.seek(0)
 
 """ Single input features """
-general_features = [features.stream_length]
+general_features = [features.stream_length, features.polarity_and_subjectivity]
 
 """ Query input features """
 query_features = [features.idf]
@@ -68,10 +69,11 @@ def process_batch(lines: list):
 
         for general_feature in general_features:
             for getter in [get.title, get.text, get.combined]:
-                feature_values.append(general_feature(getter(doc_id)))
+                ret = general_feature(getter(doc_id))
+                feature_values += ret.values()
 
                 if not feature_info_created:
-                    feature_info.append([general_feature.__name__, getter.__name__])
+                    feature_info += [[general_feature.__name__, feature_name,  getter.__name__] for feature_name in ret.keys()]
 
         for query_feature in query_features:
             for getter in [get.title, get.text, get.combined]:
@@ -118,6 +120,8 @@ with tqdm(total=galago_output_line_count if DEBUG_MODE is None else DEBUG_MODE, 
 
 
 print(*[f'{idx+1}:{", ".join(values)}\n' for idx, values in enumerate(feature_info)])
+
+pd.DataFrame(feature_info, index=[idx+1 for idx, _ in enumerate(feature_info)]).to_csv('ranklib/feature_info.csv')
 
 galago_output_file.close()
 output_file_baseline.close()

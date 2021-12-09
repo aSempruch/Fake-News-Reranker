@@ -4,6 +4,7 @@ import re
 from util.Galago import Galago
 import math
 import statistics
+from textblob import TextBlob
 
 
 class GET:
@@ -47,8 +48,10 @@ class Features:
         self.get = GET() if get is None else get
 
     @staticmethod
-    def stream_length(text: str) -> int:
-        return len(text)
+    def stream_length(text: str) -> dict:
+        return {
+            'length': len(text)
+        }
 
     def idf(self, query_id: str) -> float:
         query = self.get.query(query_id)
@@ -86,7 +89,7 @@ class Features:
         # Here, I obtain the normalized tf_vals.
         # I get the doc length, and then for every query term, I add that divided by the stream length
         # to an array.
-        doc_len = self.stream_length(document)
+        doc_len = self.stream_length(document)['length']
         norm_tf_vals = []
         for query_term in query.split(' '):
             temp = sum(1 for _ in re.finditer(r'\b%s\b' % re.escape(query_term.lower()), document.lower())) / len(document.split(' '))
@@ -108,3 +111,12 @@ class Features:
         }
 
         return norm_tf_set
+
+    @staticmethod
+    def polarity_and_subjectivity(document: str):
+        sentiment = TextBlob(document).sentiment
+
+        return {
+            'polarity': sentiment.polarity,
+            'subjectivity': sentiment.subjectivity
+        }
