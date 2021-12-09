@@ -1,4 +1,6 @@
 import os
+import pandas as pd
+import re
 
 # %%
 RANKLIB_JAR = os.getenv('RANKLIB_JAR')
@@ -28,12 +30,71 @@ def ranklib_featureEval(modelFile: str):
 
     # This is ABSOLUTELY ESSENTIAL -- not all features are always used!  This will let us know which ones weren't and which are
     # very important!
-    outputFile = 'models/' + modelFile + '_FeatureStats.txt'
+    outputFile = 'models/' + modelFile + '_FeatureStatsRaw.txt'
     f = open(outputFile, "w")
     f.write(output)
     f.close()
 
-    # Possibly add something that looks for missing or low features here?  Or high ones?
+    return
+
+def ranklib_featureProcess(modelFile: str):
+
+    # First the number of features
+    featureNames = pd.read_csv("ranklib/feature_info.csv")
+    numFeatures = len(featureNames)
+
+    # Then the feature frequency values
+    featureFile = 'models/' + modelFile + '_FeatureStatsRaw.txt'
+    f = open(featureFile, "r")
+    rawFeatures = f.read()
+    f.close()
+
+    # Use regex's to extract the features used, and their frequences
+    featureNumRegex = '(?<=\[)\d+(?=\])'
+    featureFreqRegex = '(?<=\s\s)\d+(?=\n)'
+    featuresUsed = re.findall(featureNumRegex, rawFeatures)
+    featuresFreq = re.findall(featureFreqRegex, rawFeatures)
+    # ...Afture adjusting them to hold intigers instead of strings...
+    featuresUsed = list(map(int, featuresUsed))
+    featuresFreq = list(map(int, featuresFreq))
+    # ...and then into a list of tuples...
+    featuresTuples = list(zip(featuresUsed, featuresFreq))
+    # ...and THEN sorted by the SECOND value in the tuple.  We want largest first, so it's reversed, as well.
+    featuresTuples.sort(key = lambda x: x[1], reverse = True)
+
+    # Now that we have that, method to create the string we want given the tuple:
+    def featureString(featureVals: tuple[int,int]) -> str:
+        # The first int is the tuple number, the second, the feature frequency.
+        # But first, we need to get the string of the feature information correct
+        featureFrame = featureNames.loc[featureVals[0]].fillna("")
+        #featureNameString = featureFrame.loc['0'] + " - " + featureFrame.loc['1'] + ' - ' + str(featureFrame.loc['2'])
+
+        # Now to slowly build up the string, using ljust for formatting
+
+        toReturnString = "Feature[" + (str(featureVals[0]) + "]:").rjust(5)
+        toReturnString = toReturnString.ljust(17)
+
+        # Should be starting at 15 characters
+        toReturnString += featureFrame.loc['0']
+        toReturnString = toReturnString.ljust(50)
+
+        # Should be starting at 45 characters
+        toReturnString += featureFrame.loc['1']
+        toReturnString = toReturnString.ljust(65)
+
+        toReturnString += featureFrame.loc['2']
+        toReturnString = toReturnString.ljust(75)
+        
+        toReturnString += "-- FREQ:" + (str(featureVals[1])).rjust(5)
+        return toReturnString
+
+    for t in featuresTuples:
+        print(featureString(t))
+
+    #print(featureString(featuresTuples[0]))
+
+
+    
 
     return
 
@@ -118,4 +179,8 @@ if __name__ == '__main__':
     #print(ranklib_eval('ranklib/adjusted_train.txt', 'ranklib/adjusted_valid.txt', 'ranklib/adjusted_test.txt', 'testFile'))
     #ranklib_featureEval('testFile')
     #ranklib_shuffle('ranklib/adjusted_train.txt')
-    ranklib_kfold_train('ranklib/adjusted_train.txt', 'ranklib/adjusted_valid.txt', 'ranklib/adjusted_test.txt', 'testFile')
+    #ranklib_kfold_train('ranklib/adjusted_train.txt', 'ranklib/adjusted_valid.txt', 'ranklib/adjusted_test.txt', 'testFile')
+    ranklib_featureEval('testFile')
+    ranklib_featureProcess('testFile')
+
+# %%
