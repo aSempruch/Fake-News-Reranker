@@ -88,13 +88,35 @@ def ranklib_featureProcess(modelFile: str):
         toReturnString += "-- FREQ:" + (str(featureVals[1])).rjust(5)
         return toReturnString
 
-    for t in featuresTuples:
-        print(featureString(t))
+    finalList = ["ERROR"] * (numFeatures)
 
-    #print(featureString(featuresTuples[0]))
-
-
+    # First make the full list of features that we currently are using
+    for i in range(len(featuresTuples)):
+        finalList[i] = featureString(featuresTuples[i])
     
+    curIndex = 0
+    curFeature = 1
+    curListIndex = len(featuresUsed)
+    # Then make the full list of features that we are NOT currently using
+    for i in range(numFeatures):
+        # If the current feature that we're looking at is in the features used list...
+        if((curIndex < len(featuresUsed)) and (featuresUsed[curIndex] == curFeature)):
+            # ... Look at the next feature and the next slot, and then move on.
+            curFeature += 1
+            curIndex += 1
+            continue
+
+        # ...Otherwise, add in a new string to the list, iterate where we're putting in the next line, and the feature we're looking at.
+        featureFrame = featureNames.loc[curFeature-1].fillna("")
+        finalList[curListIndex] = "NOT USED: " + (str(curFeature)).rjust(4) + "  " + featureFrame.loc['0'] + " " + featureFrame.loc['1'] + " " + featureFrame.loc['2']
+        curListIndex += 1
+        curFeature += 1
+    
+    finDocName = "models/" + modelFile + "_FeatureStatsProcessed.txt"
+    featuresFinalDoc = open(finDocName, "w")
+    for line in finalList:
+        featuresFinalDoc.write(line)
+        featuresFinalDoc.write("\n")
 
     return
 
