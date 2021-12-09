@@ -6,8 +6,6 @@ JAVA_HOME = os.getenv('JAVA_HOME')
 # If you did not compile RANKLIB with ant, then you need apache commons-math3.  Current version is 3.6.1
 MATH3_JAR = os.getenv('MATH3_JAR')
 
-print(MATH3_JAR)
-print()
 
 if None in {RANKLIB_JAR, JAVA_HOME, MATH3_JAR}:
     raise Exception('Missing environment variables')
@@ -19,6 +17,9 @@ DEFAULT_PARAMS = {
     'norm': 'zscore'
 }
 
+# TODO:  auto-training, auto-evaluation, print out and store extracted features with names
+
+# Evaluates the features on the model
 def ranklib_featureEval(modelFile: str):
     modelLoc = 'models/' + modelFile + '.txt'
     # NOTE -- the ';' in between MATH3_JAR and 'RANKLIB_JAR' is for windows systems only.  Try using ':' instead of it doesn't work.
@@ -36,7 +37,7 @@ def ranklib_featureEval(modelFile: str):
 
     return
 
-
+# Evaluates the models
 def ranklib_eval(train: str, validate: str, test: str, modelFile: str, params: dict = DEFAULT_PARAMS):
     modelLoc = 'models/' + modelFile + '.txt'
     cmd = f'"{JAVA_HOME}/bin/java.exe" -jar \"{RANKLIB_JAR}\" -load {modelLoc} -train {train} -validate {validate} -test {test} -metric2T {params["metric2T"]}'
@@ -61,6 +62,7 @@ def ranklib_eval(train: str, validate: str, test: str, modelFile: str, params: d
         'test': extract_score(split_output[-1])
     }
 
+# Trains the models
 def ranklib_train(train: str, validate: str, test: str, modelFile: str, params: dict = DEFAULT_PARAMS):
     if(modelFile):
         modelLoc = 'models/' + modelFile + '.txt'
@@ -85,8 +87,35 @@ def ranklib_train(train: str, validate: str, test: str, modelFile: str, params: 
         'test': extract_score(split_output[-3])
     }
 
+# Basic shuffling
+def ranklib_shuffle(train: str):
+    cmd = f'"{JAVA_HOME}/bin/java.exe"  -cp \"{RANKLIB_JAR}\" \"ciir.umass.edu.features.FeatureManager\" -input {train} -output ranklib/ -shuffle'
+    os.popen(cmd)
+    return
+
+# Trains with kfold training
+def ranklib_kfold_train(train: str, validate: str, test: str, modelFile: str, params: dict = DEFAULT_PARAMS):
+    if(modelFile):
+        modelLoc = 'models/' + modelFile + '.txt'
+    cmd = f'"{JAVA_HOME}/bin/java.exe" -jar \"{RANKLIB_JAR}\" -train {train} -kcv 5 -kcvmd models/kft/ -kcvmn ca -validate {validate} -test {test} {" ".join([f"-{param} {value}" for param, value in params.items()])}'
+    output = os.popen(cmd).read()
+
+    # If we where given a location to save the model, save the normal console output at it's name '_TrainingOutput.txt'.
+    if(modelFile):
+        modelTrainLoc = 'models/' + modelFile + '_TrainingOutput.txt'
+        f = open(modelTrainLoc, "w")
+        f.write(output)
+        f.close()
+
+    split_output = output.strip().split('\n')
+
+    print(split_output[-11])
+    print(split_output[-10])
+    print(split_output[-3])
 
 if __name__ == '__main__':
-    print(ranklib_train('ranklib/adjusted_train.txt', 'ranklib/adjusted_valid.txt', 'ranklib/adjusted_test.txt', 'testFile'))
-    print(ranklib_eval('ranklib/adjusted_train.txt', 'ranklib/adjusted_valid.txt', 'ranklib/adjusted_test.txt', 'testFile'))
-    ranklib_featureEval('testFile')
+    #print(ranklib_train('ranklib/adjusted_train.txt', 'ranklib/adjusted_valid.txt', 'ranklib/adjusted_test.txt', 'testFile'))
+    #print(ranklib_eval('ranklib/adjusted_train.txt', 'ranklib/adjusted_valid.txt', 'ranklib/adjusted_test.txt', 'testFile'))
+    #ranklib_featureEval('testFile')
+    #ranklib_shuffle('ranklib/adjusted_train.txt')
+    ranklib_kfold_train('ranklib/adjusted_train.txt', 'ranklib/adjusted_valid.txt', 'ranklib/adjusted_test.txt', 'testFile')
