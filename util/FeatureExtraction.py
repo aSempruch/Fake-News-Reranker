@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import re
 from util.Galago import Galago
+from nltk.corpus import stopwords
 import math
 import statistics
 from textblob import TextBlob
@@ -119,4 +120,19 @@ class Features:
         return {
             'polarity': sentiment.polarity,
             'subjectivity': sentiment.subjectivity
+        }
+
+    @staticmethod
+    def tf_title_in_text(title: str, text: str):
+        tf = 0
+        text_length = len(text.split(' '))
+        for title_term in map(str.lower, title.strip().split(' ')):
+
+            if title_term in stopwords.words('english'):
+                continue
+
+            tf += text.lower().count(title_term) / text_length
+
+        return {
+            'tf': tf
         }
