@@ -64,13 +64,14 @@ class Features:
     @staticmethod
     def term_stats(text: str) -> dict:
         proc_text = simple_preprocess(text)
+        len_proc_text = len(proc_text)
         sentences = text.split('.')
         num_words = len(proc_text)
 
         return {
             'avg_sentence_len': num_words / len(sentences),
-            'avg_word_len': np.mean(list(map(len, proc_text))),
-            'avg_syllables_per_word': np.mean(list(map(syllables.estimate, proc_text))),
+            'avg_word_len': np.mean(list(map(len, proc_text))) if len_proc_text > 0 else 0,
+            'avg_syllables_per_word': np.mean(list(map(syllables.estimate, proc_text))) if len_proc_text > 0 else 0,
             'num_long_sentences': sum([1 if len(sentence.split(' ')) > 20 else 0 for sentence in sentences])
         }
 
