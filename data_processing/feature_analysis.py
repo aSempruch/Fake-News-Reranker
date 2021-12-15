@@ -249,13 +249,13 @@ def ranklib_kfoldFeatureEval(kfoldNum: int = 1):
 
 # Evaluates the models
 def ranklib_eval(train: str, validate: str, test: str, modelFile: str, params: dict = DEFAULT_PARAMS):
-    modelLoc = 'models/' + modelFile + '.txt'
+    modelLoc = modelFile + '.txt'
     cmd = f'"{JAVA_HOME}/bin/java.exe" -jar \"{RANKLIB_JAR}\" -load {modelLoc} -train {train} -validate {validate} -test {test} -metric2T {params["metric2T"]}'
 
     output = os.popen(cmd).read()
 
     # Save the evaluation output in case we want to read it later
-    modelEvalLoc = 'models/' + modelFile + '_EvalOutput.txt'
+    modelEvalLoc = modelFile + '_EvalOutput.txt'
     f = open(modelEvalLoc, "w")
     f.write(output)
     f.close()
@@ -271,6 +271,14 @@ def ranklib_eval(train: str, validate: str, test: str, modelFile: str, params: d
         'validation': extract_score(split_output[-3]),
         'test': extract_score(split_output[-1])
     }"""
+
+
+def ranklib_kfoldEval(kfoldNum, train: str, validate: str, test: str, params: dict = DEFAULT_PARAMS):
+    for i in range(kfoldNum):
+        fileName = FLDR_KF + "f" + str(i+1) + KFLD_SUFFIX
+        ranklib_eval(train, validate, test, fileName, params)
+        pass
+    pass
 
 # Trains the models
 def ranklib_train(train: str, validate: str, test: str, modelFile: str, params: dict = DEFAULT_PARAMS):
@@ -329,16 +337,9 @@ def run_all_test():
     ranklib_shuffle('ranklib/adjusted_train.txt')
     print("K-fold training...")
     ranklib_kfold_train('ranklib/adjusted_train.txt.shuffled', 'ranklib/adjusted_valid.txt', 'ranklib/adjusted_test.txt', 'testFile')
-    print("Evaluating network 1...")
-    ranklib_eval('ranklib/adjusted_train.txt.shuffled', 'ranklib/adjusted_valid.txt', 'ranklib/adjusted_test.txt', 'kft/f1.ca')
-    print("Evaluating network 2...")
-    ranklib_eval('ranklib/adjusted_train.txt.shuffled', 'ranklib/adjusted_valid.txt', 'ranklib/adjusted_test.txt', 'kft/f2.ca')
-    print("Evaluating network 3...")
-    ranklib_eval('ranklib/adjusted_train.txt.shuffled', 'ranklib/adjusted_valid.txt', 'ranklib/adjusted_test.txt', 'kft/f3.ca')
-    print("Evaluating network 4...")
-    ranklib_eval('ranklib/adjusted_train.txt.shuffled', 'ranklib/adjusted_valid.txt', 'ranklib/adjusted_test.txt', 'kft/f4.ca')
-    print("Evaluating network 5...")
-    ranklib_eval('ranklib/adjusted_train.txt.shuffled', 'ranklib/adjusted_valid.txt', 'ranklib/adjusted_test.txt', 'kft/f5.ca')
+    
+    print("kfoldEvaluation...")
+    ranklib_kfoldEval(5, 'ranklib/adjusted_train.txt.shuffled', 'ranklib/adjusted_valid.txt', 'ranklib/adjusted_test.txt')
 
     print("Evaluating kfold model features...")
     ranklib_kfoldFeatureEval(5)
@@ -359,5 +360,7 @@ if __name__ == '__main__':
     #ranklib_featureProcess('testFile', 5)
     run_all_test()
     #ranklib_kfoldEvalProcess("test",5)
+
+# %%
 
 # %%
