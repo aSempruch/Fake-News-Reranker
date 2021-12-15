@@ -117,11 +117,14 @@ class Features:
         # Here, I obtain the normalized tf_vals.
         # I get the doc length, and then for every query term, I add that divided by the stream length
         # to an array.
-        doc_len = self.stream_length(document)['length']
+        doc_len = len( document.split() )#self.stream_length(document)['length']
         norm_tf_vals = []
         for query_term in query.split(' '):
-            temp = sum(1 for _ in re.finditer(r'\b%s\b' % re.escape(query_term.lower()), document.lower())) / len(document.split(' '))
-            norm_tf_vals.append( temp / doc_len )
+            if(doc_len):
+                temp = sum(1 for _ in re.finditer(r'\b%s\b' % re.escape(query_term.lower()), document.lower())) / len(document.split(' '))
+                norm_tf_vals.append( temp / doc_len )
+            else:
+                norm_tf_vals.append(0)
 
         # Now that I have the normalized term frequency, it is time to get the values for it.
         norm_tf_sum = sum(norm_tf_vals)
