@@ -64,19 +64,20 @@ class Features:
     @staticmethod
     def term_stats(text: str) -> dict:
         proc_text = simple_preprocess(text)
-        num_sentences = len(text.split('.'))
+        sentences = text.split('.')
         num_words = len(proc_text)
 
         return {
-            'avg_sentence_len': num_words / num_sentences,
+            'avg_sentence_len': num_words / len(sentences),
             'avg_word_len': np.mean(list(map(len, proc_text))),
-            'avg_syllables_per_word': np.mean(list(map(syllables.estimate, proc_text)))
+            'avg_syllables_per_word': np.mean(list(map(syllables.estimate, proc_text))),
+            'num_long_sentences': sum([1 if len(sentence.split(' ')) > 16 else 0 for sentence in sentences])
         }
 
     def spelling(self, text: str) -> dict:
         proc_text = simple_preprocess(text)
         return {
-            'ratio_misspelled_words': len(self.spellcheck.unknown(proc_text))/len(proc_text)
+            'ratio_misspelled_words': len(self.spellcheck.unknown(proc_text))/len(proc_text) if len(proc_text) > 0 else 0
         }
 
     def idf(self, query_id: str) -> float:
