@@ -93,9 +93,9 @@ def ranklib_kfoldEvalProcess(modelFile: str = "TEST_NAME", kfoldNum: int = 1):
     # Now we have all of the correct values.  Time to prepare the output file.
     outputFile = open(outputFileName, "w")
     outputFile.write( "Average evaluation vals for model " + modelFile + "\nKfold num: " + str(kfoldNum) + "\n" )
-    outputFile.write("Train: " + typeTrain + " " + str(avgTrain) + "\n" )
-    outputFile.write("Train: " + typeVal + " " + str(avgVal) + "\n" )
-    outputFile.write("Train: " + typeTest + " " + str(avgTest) + "\n" )
+    outputFile.write("Train     : " + typeTrain + " " + str(avgTrain) + "\n" )
+    outputFile.write("Validation: " + typeVal + " " + str(avgVal) + "\n" )
+    outputFile.write("Test      : " + typeTest + " " + str(avgTest) + "\n" )
     
     return
 
@@ -249,28 +249,21 @@ def ranklib_kfoldFeatureEval(kfoldNum: int = 1):
 
 # Evaluates the models
 def ranklib_eval(train: str, validate: str, test: str, modelFile: str, params: dict = DEFAULT_PARAMS):
-    modelLoc = modelFile + '.txt'
-    cmd = f'"{JAVA_HOME}/bin/java.exe" -jar \"{RANKLIB_JAR}\" -load {modelLoc} -train {train} -validate {validate} -test {test} -metric2T {params["metric2T"]}'
+    modelLoc = modelFile
+    #cmd = f'"{JAVA_HOME}/bin/java.exe" -jar \"{RANKLIB_JAR}\" -load {modelLoc} -train {train} -validate {validate} -test {test} -metric2T {params["metric2T"]}'
+    #cmd = f'"{JAVA_HOME}/bin/java.exe" -jar \"{RANKLIB_JAR}\" -train {train} -load {modelLoc} -test {test} -metric2t {params["metric2t"]} -metric2T {params["metric2T"]}'
+    cmd = f'"{JAVA_HOME}/bin/java.exe" -jar \"{RANKLIB_JAR}\" -load {modelLoc} -test {test} -metric2T {params["metric2T"]}'
+    print()
+    print(cmd)
+    print()
 
     output = os.popen(cmd).read()
-
+    
     # Save the evaluation output in case we want to read it later
     modelEvalLoc = modelFile + '_EvalOutput.txt'
     f = open(modelEvalLoc, "w")
     f.write(output)
     f.close()
-
-    """
-    split_output = output.strip().split('\n')
-
-    def extract_score(line: str) -> float:
-        return float(line[line.index(':')+2:])
-
-    return {
-        'train': extract_score(split_output[-4]),
-        'validation': extract_score(split_output[-3]),
-        'test': extract_score(split_output[-1])
-    }"""
 
 
 def ranklib_kfoldEval(kfoldNum, train: str, validate: str, test: str, params: dict = DEFAULT_PARAMS):
@@ -312,10 +305,11 @@ def ranklib_shuffle(train: str):
     return
 
 # Trains with kfold training
-def ranklib_kfold_train(train: str, validate: str, test: str, modelFile: str, params: dict = DEFAULT_PARAMS):
+def ranklib_kfold_train(train: str, modelFile: str, params: dict = DEFAULT_PARAMS):
     if(modelFile):
         modelLoc = 'models/' + modelFile + '.txt'
-    cmd = f'"{JAVA_HOME}/bin/java.exe" -jar \"{RANKLIB_JAR}\" -train {train} -kcv 5 -kcvmd models/kft/ -kcvmn ca -validate {validate} -test {test} {" ".join([f"-{param} {value}" for param, value in params.items()])}'
+    #cmd = f'"{JAVA_HOME}/bin/java.exe" -jar \"{RANKLIB_JAR}\" -train {train} -kcv 5 -kcvmd models/kft/ -kcvmn ca -validate {validate} -test {test} {" ".join([f"-{param} {value}" for param, value in params.items()])}'
+    cmd = f'"{JAVA_HOME}/bin/java.exe" -jar \"{RANKLIB_JAR}\" -train {train} -kcv 5 -kcvmd models/kft/ -kcvmn ca -tvs 0.9 {" ".join([f"-{param} {value}" for param, value in params.items()])}'
     output = os.popen(cmd).read()
 
     # If we where given a location to save the model, save the normal console output at it's name '_TrainingOutput.txt'.
@@ -334,18 +328,19 @@ def ranklib_kfold_train(train: str, validate: str, test: str, modelFile: str, pa
 
 def run_all_test():
     print("Shuffling training data...")
-    ranklib_shuffle('ranklib/adjusted_train.txt')
+    ranklib_shuffle('ranklib/adjusted.txt')
     print("K-fold training...")
-    ranklib_kfold_train('ranklib/adjusted_train.txt.shuffled', 'ranklib/adjusted_valid.txt', 'ranklib/adjusted_test.txt', 'testFile')
+    #ranklib_kfold_train('ranklib/adjusted_train.txt.shuffled', 'ranklib/adjusted_valid.txt', 'ranklib/adjusted_test.txt', 'testFile')
+    ranklib_kfold_train('ranklib/adjusted.txt.shuffled', 'testFile')
     
-    print("kfoldEvaluation...")
-    ranklib_kfoldEval(5, 'ranklib/adjusted_train.txt.shuffled', 'ranklib/adjusted_valid.txt', 'ranklib/adjusted_test.txt')
+    #print("kfoldEvaluation...")
+    #ranklib_kfoldEval(1, 'ranklib/adjusted_train.txt.shuffled', 'ranklib/adjusted_valid.txt', 'ranklib/adjusted_test.txt')
 
-    print("Evaluating kfold model features...")
-    ranklib_kfoldFeatureEval(5)
+    #print("Evaluating kfold model features...")
+    #ranklib_kfoldFeatureEval(1)
 
-    print("Processing kfold model features...")
-    ranklib_kfoldFeatureProcess("test",5)
+    #print("Processing kfold model features...")
+    #ranklib_kfoldFeatureProcess("test",1)
 
     pass
 
