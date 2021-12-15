@@ -6,6 +6,10 @@ from nltk.corpus import stopwords
 import math
 import statistics
 from textblob import TextBlob
+from gensim.models.doc2vec import Doc2Vec
+from gensim.utils import simple_preprocess
+from scipy import spatial
+from spellchecker import SpellChecker
 
 
 class GET:
@@ -47,11 +51,19 @@ class Features:
     def __init__(self, galago: Galago = None, get: GET = None):
         self.galago = Galago() if galago is None else galago
         self.get = GET() if get is None else get
+        self.doc2vec_model = Doc2Vec.load('data/doc2vec_model')
+        self.spellcheck = SpellChecker()
 
     @staticmethod
     def stream_length(text: str) -> dict:
         return {
             'length': len(text)
+        }
+
+    def spelling(self, text: str) -> dict:
+        proc_text = simple_preprocess(text)
+        return {
+            'ratio_misspelled_words': len(self.spellcheck.unknown(proc_text))/len(proc_text)
         }
 
     def idf(self, query_id: str) -> float:
@@ -136,3 +148,19 @@ class Features:
         return {
             'tf': tf
         }
+
+    def _doc2vec_vector(self, input: str):
+        return self.doc2vec_model.infer_vector(simple_preprocess(input))
+
+    def doc2vec_query_document(self, query_id: str, document: str):
+        query = self.get.query(query_id)
+        query_vec = self._doc2vec_vector(query)
+        doc_vec = self._doc2vec_vector(document)
+
+        return {'cos_sim': spatial.distance.cosine(query_vec, doc_vec)}
+
+    def doc2vec_document(self, title: str, text: str):
+        title_vec = self._doc2vec_vector(title)
+        text_vec = self._doc2vec_vector(text)
+
+        return {'cos_sim': spatial.distance.cosine(title_vec, text_vec)}

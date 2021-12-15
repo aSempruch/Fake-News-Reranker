@@ -38,16 +38,25 @@ galago_output_line_count = sum(1 for _ in galago_output_file)
 galago_output_file.seek(0)
 
 """ Single input features """
-general_features = [features.stream_length, features.polarity_and_subjectivity]
+general_features = [
+    features.stream_length,
+    features.polarity_and_subjectivity,
+    features.spelling
+]
 
 """ Query input features """
 query_features = [features.idf]
 
 """ Query/Document input features """
-query_document_features = [features.term_frequency, features.tfidf, features.stream_length_normalized_tf]
+query_document_features = [
+    features.term_frequency,
+    features.tfidf,
+    features.stream_length_normalized_tf,
+    features.doc2vec_query_document
+]
 
 """ Title/Text input features """
-title_text_features = [features.tf_title_in_text]
+title_text_features = [features.tf_title_in_text, features.doc2vec_document]
 
 feature_info = []
 feature_info_created = False
