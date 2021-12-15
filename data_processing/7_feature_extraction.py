@@ -46,6 +46,9 @@ query_features = [features.idf]
 """ Query/Document input features """
 query_document_features = [features.term_frequency, features.tfidf, features.stream_length_normalized_tf]
 
+""" Title/Text input features """
+title_text_features = [features.tf_title_in_text]
+
 feature_info = []
 feature_info_created = False
 
@@ -86,6 +89,12 @@ def process_batch(lines: list):
                 feature_values += ret.values()
                 if not feature_info_created:
                     feature_info += [[query_document_feature.__name__, feature_name,  getter.__name__] for feature_name in ret.keys()]
+
+        for title_text_feature in title_text_features:
+            ret = title_text_feature(get.title(doc_id), get.text(doc_id))
+            feature_values += ret.values()
+            if not feature_info_created:
+                feature_info += [[title_text_feature.__name__, feature_name, 'title+text'] for feature_name in ret.keys()]
 
         output_line = [f'qid:{query_id}', *[f'{idx+1}:{feature_value}' for (idx, feature_value) in enumerate(feature_values)], '#', get.truth(doc_id), doc_id]
         output_file_baseline.write(' '.join(map(str, [rel_baseline, *output_line])) + '\n')
