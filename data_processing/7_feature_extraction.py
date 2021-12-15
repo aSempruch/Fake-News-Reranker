@@ -15,11 +15,11 @@ FEATURES
     [X] max of term frequency
     [X] mean of term frequency
     [X] variance of term frequency
-    [ ] sum of stream length normalized term frequency
-    [ ] min of stream length normalized term frequency
-    [ ] max of stream length normalized term frequency
-    [ ] mean of stream length normalized term frequency
-    [ ] variance of stream length normalized term frequency
+    [x] sum of stream length normalized term frequency
+    [x] min of stream length normalized term frequency
+    [x] max of stream length normalized term frequency
+    [x] mean of stream length normalized term frequency
+    [x] variance of stream length normalized term frequency
     [X] sum of tf*idf
     [X] min of tf*idf
     [X] max of tf*idf
