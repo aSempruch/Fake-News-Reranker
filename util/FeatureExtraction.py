@@ -71,7 +71,7 @@ class Features:
             'avg_sentence_len': num_words / len(sentences),
             'avg_word_len': np.mean(list(map(len, proc_text))),
             'avg_syllables_per_word': np.mean(list(map(syllables.estimate, proc_text))),
-            'num_long_sentences': sum([1 if len(sentence.split(' ')) > 16 else 0 for sentence in sentences])
+            'num_long_sentences': sum([1 if len(sentence.split(' ')) > 20 else 0 for sentence in sentences])
         }
 
     def spelling(self, text: str) -> dict:
