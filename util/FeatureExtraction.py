@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import re
+import syllables
 from util.Galago import Galago
 from nltk.corpus import stopwords
 import math
@@ -65,9 +66,11 @@ class Features:
         proc_text = simple_preprocess(text)
         num_sentences = len(text.split('.'))
         num_words = len(proc_text)
+
         return {
             'avg_sentence_len': num_words / num_sentences,
-            'avg_word_len': np.mean(list(map(len, proc_text)))
+            'avg_word_len': np.mean(list(map(len, proc_text))),
+            'avg_syllables_per_word': np.mean(list(map(syllables.estimate, proc_text)))
         }
 
     def spelling(self, text: str) -> dict:
