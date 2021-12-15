@@ -40,8 +40,13 @@ galago_output_file.seek(0)
 """ Single input features """
 general_features = [
     features.stream_length,
-    features.polarity_and_subjectivity,
     features.spelling
+]
+
+""" Text input features (only take `text` portion of document) """
+text_input_features = [
+    features.polarity_and_subjectivity,
+    features.term_stats
 ]
 
 """ Query input features """
@@ -84,6 +89,14 @@ def process_batch(lines: list):
 
                 if not feature_info_created:
                     feature_info += [[general_feature.__name__, feature_name,  getter.__name__] for feature_name in ret.keys()]
+
+        for text_input_feature in text_input_features:
+            ret = text_input_feature(get.text(doc_id))
+            feature_values += ret.values()
+
+            if not feature_info_created:
+                feature_info += [[text_input_feature.__name__, feature_name,  get.text.__name__] for feature_name in ret.keys()]
+
 
         for query_feature in query_features:
             for getter in [get.title, get.text, get.combined]:

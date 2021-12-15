@@ -60,6 +60,16 @@ class Features:
             'length': len(text)
         }
 
+    @staticmethod
+    def term_stats(text: str) -> dict:
+        proc_text = simple_preprocess(text)
+        num_sentences = len(text.split('.'))
+        num_words = len(proc_text)
+        return {
+            'avg_sentence_len': num_words / num_sentences,
+            'avg_word_len': np.mean(list(map(len, proc_text)))
+        }
+
     def spelling(self, text: str) -> dict:
         proc_text = simple_preprocess(text)
         return {
