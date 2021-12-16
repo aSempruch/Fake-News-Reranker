@@ -481,12 +481,13 @@ def run_fin():
                 if(norm != 'no_norm'):
                     cur_params['norm'] = norm
 
-                modelName = norm + "_Tr-" + getName(train) + "_Te-" + getName(test)
+                modelName = "BASELINE_" + norm + "_Tr-" + getName(train) + "_Te-" + getName(test)
 
                 # We now, for one loop, have the training and test metrics, as well as the model name.
                 # Now we need to train the models and get and store the feature evaluations.
 
-                ranklib_train('ranklib/adjusted_train.txt.shuffled', 'ranklib/adjusted_valid.txt', 'ranklib/adjusted_test.txt', modelName, cur_params)
+                #ranklib_train('ranklib/adjusted_train.txt.shuffled', 'ranklib/adjusted_valid.txt', 'ranklib/adjusted_test.txt', modelName, cur_params)
+                ranklib_train('ranklib/baseline_train.txt', 'ranklib/baseline_valid.txt', 'ranklib/baseline_test.txt', modelName, cur_params)
 
                 # Now that the model is trained, it's time to get its feature evaluation
                 ranklib_featureEval(modelName)
@@ -530,7 +531,7 @@ def run_fin():
         os.popen(cmdB)
         pass
     
-    """       
+           
     # Now that all that is done with, it's time to process the variety of features in a more efficient manner.
     # For this, we shall want features by:
     #   Normalization value
@@ -551,8 +552,8 @@ def run_fin():
             for norm in normalizeOptions:
                 # As for the train list the train folders should be the same, and the reverse is true
                 # for the norm list, this is how we're doing it.
-                trainFld = FLD_FEATURE_PROC + norm + "_Tr-" + getName(i) + "_Te-" + getName(j) + "_FeatureStatsProcessed.txt"
-                testFld = FLD_FEATURE_PROC + norm + "_Tr-" + getName(j) + "_Te-" + getName(i) + "_FeatureStatsProcessed.txt"
+                trainFld = FLD_FEATURE_PROC + "BASELINE_" + norm + "_Tr-" + getName(i) + "_Te-" + getName(j) + "_FeatureStatsProcessed.txt"
+                testFld = FLD_FEATURE_PROC + "BASELINE_" + norm + "_Tr-" + getName(j) + "_Te-" + getName(i) + "_FeatureStatsProcessed.txt"
                 trainList.append(trainFld)
                 testList.append(testFld)
             pass
@@ -563,7 +564,7 @@ def run_fin():
         normList = []
         for i in metrics:
             for j in metrics:
-                fldr = FLD_FEATURE_PROC + norm + "_Tr-" + getName(i) + "_Te-" + getName(j) + "_FeatureStatsProcessed.txt"
+                fldr = FLD_FEATURE_PROC + "BASELINE_" + norm + "_Tr-" + getName(i) + "_Te-" + getName(j) + "_FeatureStatsProcessed.txt"
                 normList.append(fldr)
         featureFoldersNorm.append(normList)
 
@@ -694,25 +695,25 @@ def run_fin():
 
     # And now, finally, we call upon this for each list of files!
     # Done manually because EXHAUSTED
-    procProccessedFeatures(featureFoldersTest[0], "test_" + getName("m"))
-    procProccessedFeatures(featureFoldersTest[1], "test_" + getName("n"))
-    procProccessedFeatures(featureFoldersTest[2], "test_" + getName("d"))
-    procProccessedFeatures(featureFoldersTest[3], "test_" + getName("p"))
-    procProccessedFeatures(featureFoldersTest[4], "test_" + getName("r"))
-    procProccessedFeatures(featureFoldersTest[5], "test_" + getName("e"))
+    procProccessedFeatures(featureFoldersTest[0], "BASELINE_test_" + getName("m"))
+    procProccessedFeatures(featureFoldersTest[1], "BASELINE_test_" + getName("n"))
+    procProccessedFeatures(featureFoldersTest[2], "BASELINE_test_" + getName("d"))
+    procProccessedFeatures(featureFoldersTest[3], "BASELINE_test_" + getName("p"))
+    procProccessedFeatures(featureFoldersTest[4], "BASELINE_test_" + getName("r"))
+    procProccessedFeatures(featureFoldersTest[5], "BASELINE_test_" + getName("e"))
 
 
-    procProccessedFeatures(featureFoldersTrain[0], "train_" + getName("m"))
-    procProccessedFeatures(featureFoldersTrain[1], "train_" + getName("n"))
-    procProccessedFeatures(featureFoldersTrain[2], "train_" + getName("d"))
-    procProccessedFeatures(featureFoldersTrain[3], "train_" + getName("p"))
-    procProccessedFeatures(featureFoldersTrain[4], "train_" + getName("r"))
-    procProccessedFeatures(featureFoldersTrain[5], "train_" + getName("e"))
+    procProccessedFeatures(featureFoldersTrain[0], "BASELINE_train_" + getName("m"))
+    procProccessedFeatures(featureFoldersTrain[1], "BASELINE_train_" + getName("n"))
+    procProccessedFeatures(featureFoldersTrain[2], "BASELINE_train_" + getName("d"))
+    procProccessedFeatures(featureFoldersTrain[3], "BASELINE_train_" + getName("p"))
+    procProccessedFeatures(featureFoldersTrain[4], "BASELINE_train_" + getName("r"))
+    procProccessedFeatures(featureFoldersTrain[5], "BASELINE_train_" + getName("e"))
 
-    procProccessedFeatures(featureFoldersNorm[0], "norm_none")
-    procProccessedFeatures(featureFoldersNorm[1], "norm_sum")
-    procProccessedFeatures(featureFoldersNorm[2], "norm_zscore")
-    procProccessedFeatures(featureFoldersNorm[3], "norm_linear")"""
+    procProccessedFeatures(featureFoldersNorm[0], "BASELINE_norm_none")
+    procProccessedFeatures(featureFoldersNorm[1], "BASELINE_norm_sum")
+    procProccessedFeatures(featureFoldersNorm[2], "BASELINE_norm_zscore")
+    procProccessedFeatures(featureFoldersNorm[3], "BASELINE_norm_linear")
 
 
 
