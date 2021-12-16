@@ -9,19 +9,11 @@ FLDR_UNADJ = FLDR_BASE + "unadjusted/analysis/"
 FILE_NAMES = ["compilation_MAP", "compilation_NDCG", "compilation_DCG", "compilation_P", "compilation_RR", "compilation_ERR"]
 FLDR_LOCS = [FLDR_ADJ, FLDR_UNADJ]
 
+# This was done roughly in an attempt to get it done with enough time to view the analysis and see the results.
+# It works, but it does have duplicated, sometimes messy code.
 def plot_analysis():
 
-    """
-        What I need to do is:
-            Show comparison between baseline and ajusted
-                On baseline and adjusted
-            Via training and model type
-                as test type is not needed
-            There is a total of 2*6*4=48 graphs to compare to themselves and each other
-            Thus, I shall split them into 4 graphs of 12 -- splitting them up by normalization
-                And obtaining all of the correct normalization into the correct slot
-            Thus, there shall be a total of 8 graphs to create.
-    """
+    # Names for the training files!
     nameTrain = [
         "_Tr-MAP",
         "_Tr-NDCG",
@@ -31,24 +23,19 @@ def plot_analysis():
         "_Tr-ERR"
     ]
     nameTest = "_Te-NDCG"
-    nameModel = {
-        "no_norm",
-        "sum",
-        "zscore",
-        "linear"
-    }
-    nameBase = "BASELINE_"
 
     namesNone = []
     namesSum = []
     namesZscore = []
     namesLinear = []
     for trainType in nameTrain:
+        # Done manually per set due to getting it done instead of getting it fancy
         namesNone.append("no_norm" + trainType + nameTest)
         namesSum.append("sum" + trainType + nameTest)
         namesZscore.append("zscore" + trainType + nameTest)
         namesLinear.append("linear" + trainType + nameTest)
 
+    # Names for later!
     nameTrain = [
         "MAP",
         "NDCG",
@@ -57,9 +44,6 @@ def plot_analysis():
         "RR",
         "ERR"
     ]
-
-    allNames = []
-    # Here we are collecting all names
 
     # For every folder and every file name...
     for fileNameNot in FILE_NAMES:
@@ -81,6 +65,7 @@ def plot_analysis():
         adj = open(fileLocAdj, "r")
         # Here I collect the data
 
+        # For every line in the 'adjusted' tests file, see what category it belongs to and add the tuple.
         for line in adj:
             if(line.startswith("Detailed break down")):
                 break
@@ -127,6 +112,7 @@ def plot_analysis():
         
         adj.close()
         
+        # For every line in the 'baseline' tests file, see what category it belongs to and add the tuple.
         for line in base:
             if(line.startswith("Detailed break down")):
                 break
@@ -187,6 +173,8 @@ def plot_analysis():
             "-test_adj-norm_no","-test_adj-norm_sum","-test_base-norm_lin","-test_adj-norm_zscore"
             ]
 
+        # For each dataset, extract the values, and make graphs!
+        # And save graphs, too!
         for i in range(len(datasets)):
             set = datasets[i]
             names = []
@@ -214,12 +202,9 @@ def plot_analysis():
             ax.set_xticks(x, names)
             ax.legend()
 
-            #ax.bar_label(rects1, padding=3)
-            #ax.bar_label(rects2, padding=3)
 
             fig.tight_layout()
             loc = "images/original/" + fileNameNot+saveTo[i]+".jpg"
-            #print(loc)
             plt.savefig(loc)
             plt.clf()
 
@@ -246,14 +231,6 @@ def plot_analysis():
             plt.clf()
 
             plt.close()
-
-        """testNames = [i[0] for i in dataAdjNone]
-        testVals = [i[1] for i in dataAdjNone]
-        print(testNames)
-        print(testVals)
-        plt.bar(testNames, testVals)
-        plt.title(fileName)
-        plt.show()"""
 
     pass
 
