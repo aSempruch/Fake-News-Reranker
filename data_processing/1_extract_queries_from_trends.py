@@ -4,7 +4,6 @@ import pandas as pd
 
 df = pd.read_csv('datasets/trends.csv')
 # Filter out non global or US queries
-# TODO: this still contains some spanish queries
 df.query('location == "Global" or location == "United States"', inplace=True)
 unique_queries = pd.DataFrame(df['query'].unique())
 unique_queries.replace(r'[^a-zA-Z\s:]', '', regex=True, inplace=True)

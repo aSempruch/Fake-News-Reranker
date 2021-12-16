@@ -6,26 +6,6 @@ import math
 
 # Number of lines to parse. Set to None to disable debug mode
 DEBUG_MODE = None
-"""
-FEATURES
-    [X] stream length - t
-    [X] IDF - q,d
-    [X] sum of term frequency
-    [X] min of term frequency
-    [X] max of term frequency
-    [X] mean of term frequency
-    [X] variance of term frequency
-    [x] sum of stream length normalized term frequency
-    [x] min of stream length normalized term frequency
-    [x] max of stream length normalized term frequency
-    [x] mean of stream length normalized term frequency
-    [x] variance of stream length normalized term frequency
-    [X] sum of tf*idf
-    [X] min of tf*idf
-    [X] max of tf*idf
-    [X] mean of tf*idf
-    [X] variance of tf*idf
-"""
 
 get = GET()
 features = Features(get=get)
@@ -97,7 +77,6 @@ def process_batch(lines: list):
             if not feature_info_created:
                 feature_info += [[text_input_feature.__name__, feature_name,  get.text.__name__] for feature_name in ret.keys()]
 
-
         for query_feature in query_features:
             for getter in [get.title, get.text, get.combined]:
                 feature_values.append(query_feature(query_id))
@@ -155,10 +134,3 @@ pd.DataFrame(feature_info, index=[idx+1 for idx, _ in enumerate(feature_info)]).
 galago_output_file.close()
 output_file_baseline.close()
 output_file_adjusted.close()
-
-"""
-Focus on identifying important features
-
-Model trained on veracity - evaluate on relevancy and veracity data
-Train model on weak labels and do the same
-"""

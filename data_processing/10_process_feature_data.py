@@ -53,17 +53,6 @@ for model_type in TRAIN_PREFIXES:
 
 # %% Get performance data
 
-PLOTTED_TEST_METRICS = {
-    'NCDG@10',
-    'MAP',
-    'precision',
-    'RR'
-}
-
-PLOTTED_TRAIN_METRICS = {
-    *PLOTTED_TEST_METRICS
-}
-
 DIRECTORIES = {
     'd': 'DCG@10',
     'e': 'ERR@10',
@@ -116,9 +105,7 @@ clean_name = lambda n: n.replace("@", "")
 
 for test_type_name, test_type in all_performance_data.items():
     for test_metric_name, test_metric in test_type.items():
-        if test_metric_name not in PLOTTED_TEST_METRICS: continue
         for train_metric_name, train_metric in test_metric.items():
-            if train_metric_name not in PLOTTED_TRAIN_METRICS: continue
             plt.clf()
             # for train_metric_name, train_metric in train_metric.items():
             X = NORMALIZATIONS
@@ -140,6 +127,3 @@ for test_type_name, test_type in all_performance_data.items():
             plt.title(f'{test_metric_name} of model\ntested on {test_type_name} data\ntrained using {train_metric_name} metric')
             plt.legend(loc='lower right')
             plt.savefig(f'figures/{test_type_name}_te_{clean_name(test_metric_name)}_tr-{clean_name(train_metric_name)}.jpeg')
-    #         break
-    #     break
-    # break

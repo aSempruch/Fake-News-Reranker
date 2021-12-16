@@ -19,7 +19,6 @@ class GET:
         self.NEWS_DF = pd.read_csv(news_df_path, index_col=0)
         self.QUERIES_DF = pd.read_csv(queries_path, index_col=0, sep="\t", header=None)
         self.TERM_STATS_DF = pd.read_csv(term_stats_path, index_col=0, sep="\t", header=None)
-        # self.TFIDF_MODEL = TfidfVectorizer().fit(self.NEWS_DF[['text', 'title']])
 
     def truth(self, doc_id) -> int:
         """
